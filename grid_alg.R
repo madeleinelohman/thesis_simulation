@@ -1,4 +1,4 @@
-grid.alg <- function(x, level, n){
+grid.alg <- function(x, level, n, grp.lvl){
   #~~~~~~~~~~~~~~~~~~~~
   # Run method
   #~~~~~~~~~~~~~~~~~~~~
@@ -6,7 +6,7 @@ grid.alg <- function(x, level, n){
   total.mean <- mean(values(x)) ### Find the mean of the raster
   
   ### Set up matrices for the for loop
-  grp.lvl = 5 # Window to group cells by (new grid dimension sizes)
+  # grp.lvl = Window to group cells by (new grid dimension sizes)
   grd <- matrix(NA, n*2/grp.lvl, n*2/grp.lvl) # New grid
   ssw <- matrix(NA, n*2/grp.lvl, n*2/grp.lvl) # Within-cluster sum of squares
   ssb <- matrix(NA, n*2/grp.lvl, n*2/grp.lvl) # Between-cluster sum of squares
@@ -36,7 +36,7 @@ grid.alg <- function(x, level, n){
   #~~~~~~~~~~~~~~~~~~~~
   # Rasterize results
   #~~~~~~~~~~~~~~~~~~~~
-  new.r=rast(ncol=n*2/5,nrow=n*2/5,extent=c(-n,n,-n,n))
+  new.r=rast(ncol=n*2/grp.lvl,nrow=n*2/grp.lvl,extent=c(-n,n,-n,n))
   new.r[]=0
   new.s.r=crds(new.r)
   new.hab=new.r
@@ -49,10 +49,10 @@ grid.alg <- function(x, level, n){
   # plot(new.hab, main='Grided habitat')
   # dev.off()
   
-  par(mfrow=c(1,2))
-  plot(x, main=paste("Simulated habitat:", level))
-  plot(new.hab, main=paste("Grided habitat:", level))
-  par(mfrow=c(1,1))
+  # par(mfrow=c(1,2))
+  # plot(x, main=paste("Simulated habitat:", level))
+  # plot(new.hab, main=paste("Grided habitat:", level))
+  # par(mfrow=c(1,1))
   
   p <- ggplot() +
     geom_spatraster(data=new.hab) +
@@ -65,6 +65,8 @@ grid.alg <- function(x, level, n){
   png(paste0("plots/grid_plots/grid_",level,".png"), 6, 6, res=600, units="in")
   print(p)
   dev.off()
+  
+  #v <- st_as_sf(new.hab, coords=c('x', 'y'))
   
   ### Return objects
   return(list(new.hab=new.hab, ssw=ssw, ssb=ssb, sst=ss.total, ssb.sst=ssb.sst,

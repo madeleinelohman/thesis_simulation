@@ -15,7 +15,14 @@ azp.n.clust <- function(x, min.clust, max.clust, index){
   for(i in min.clust:max.clust){
     cr <- azp_tabu(i, queen_w, data) 
     eval$RBTSSE[i-(min.clust-1)] <- cr$`The ratio of between to total sum of squares`
-    eval$Index[i-(min.clust-1)] <- unlist(intCriteria(x1, as.vector(as.integer(cr$Clusters)), crit=index))
+    
+    new1 <- data.frame(org=as.vector(as.integer(cr$Clusters)), new=NA)
+    clusts <- unique(new1$org)
+    for(j in 1:length(clusts)){
+      new1$new[which(new1$org == clusts[j])] <- j
+    }
+    
+    eval$Index[i-(min.clust-1)] <- unlist(intCriteria(x1, new1$new, crit=index))
   }
   
   # rbsste.plot <- ggplot(eval, aes(x=clusters,y=RBTSSE)) +

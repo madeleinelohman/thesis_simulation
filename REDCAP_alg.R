@@ -1,4 +1,4 @@
-redcap.alg <- function(x, level, min.clust, max.clust, index="Calinski_Harabasz", n){
+redcap.alg <- function(x, level, min.clust, max.clust, index, n){
   source("redcap_n_clust.R")
   #~~~~~~~~~~~~~~~~~~~~
   # Decide number of clusters
@@ -61,7 +61,7 @@ redcap.alg <- function(x, level, min.clust, max.clust, index="Calinski_Harabasz"
     lims(x=c(-n, n), y=c(-n, n)) +
     guides(fill=guide_legend(title="Value"))
   
-  png(paste0("plots/redcap_plots/redcap_",level,".png"), 6, 6, res=600, units="in")
+  png(paste0("plots/redcap_plots/redcap_",level,"_",index,".png"), 6, 6, res=600, units="in")
   print(p)
   dev.off()
   
@@ -86,6 +86,6 @@ redcap.alg <- function(x, level, min.clust, max.clust, index="Calinski_Harabasz"
   ssb.sst <- sum(ssb) / ss.total
   
   ### Return objects
-  return(list(new.hab=new.hab, ssw=ssw, ssb=ssb, sst=ss.total, ssb.sst=ssb.sst,
+  return(list(new.hab=pred, ssw=ssw, ssb=ssb, sst=ss.total, ssb.sst=ssb.sst,
               clusters=cr$Clusters, n.clust=n.clust,p=p))
 }

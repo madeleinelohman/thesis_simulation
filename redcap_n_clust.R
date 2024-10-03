@@ -13,9 +13,16 @@ redcap.n.clust <- function(x, min.clust, max.clust, index){
   eval <- data.frame(clusters=min.clust:max.clust, RBTSSE=NA, Index=NA)
   
   for(i in min.clust:max.clust){
-    cr_q <- redcap(i, queen_w, data, "fullorder-completelinkage", cpu_threads=1)
-    eval$RBTSSE[i-(min.clust-1)] <- cr_q$`The ratio of between to total sum of squares`
-    eval$Index[i-(min.clust-1)] <- unlist(intCriteria(x1, as.vector(as.integer(cr_q$Clusters)), crit=index))
+    cr <- redcap(i, queen_w, data, "fullorder-completelinkage", cpu_threads=1)
+    eval$RBTSSE[i-(min.clust-1)] <- cr$`The ratio of between to total sum of squares`
+    
+    new1 <- data.frame(org=as.vector(as.integer(cr$Clusters)), new=NA)
+    clusts <- unique(new1$org)
+    for(j in 1:length(clusts)){
+      new1$new[which(new1$org == clusts[j])] <- j
+    }
+    
+    eval$Index[i-(min.clust-1)] <- unlist(intCriteria(x1, new1$new, crit=index))
   }
   
   # rbsste.plot <- ggplot(eval, aes(x=clusters,y=RBTSSE)) +
