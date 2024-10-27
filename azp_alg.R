@@ -3,7 +3,7 @@ azp.alg <- function(x, level, min.clust, max.clust, index){
   #~~~~~~~~~~~~~~~~~~~~
   # Decide number of clusters
   #~~~~~~~~~~~~~~~~~~~~
-  source("azp_n_clust.R")
+  source("algs/azp_n_clust.R")
   n.clust <- azp.n.clust(x, min.clust, max.clust, index)
   
   #~~~~~~~~~~~~~~~~~~~~

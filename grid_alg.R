@@ -1,4 +1,11 @@
-grid.alg <- function(x, level, n, grp.lvl){
+grid.alg <- function(x, level, n, index){
+  
+  #~~~~~~~~~~~~~~~~~~~~
+  # Decide number of clusters
+  #~~~~~~~~~~~~~~~~~~~~
+  source("algs/grid_n_clust.R")
+  grp.lvl <- grid.n.clust(x, index, n)
+  
   #~~~~~~~~~~~~~~~~~~~~
   # Run method
   #~~~~~~~~~~~~~~~~~~~~
@@ -42,18 +49,6 @@ grid.alg <- function(x, level, n, grp.lvl){
   new.hab=new.r
   new.hab[]=c(grd)
   
-  #~~~~~~~~~~~~~~~~~~~~
-  # Plot
-  #~~~~~~~~~~~~~~~~~~~~
-  # png("plots/grid_pred.png", 6, 6, "in", res=600)
-  # plot(new.hab, main='Grided habitat')
-  # dev.off()
-  
-  # par(mfrow=c(1,2))
-  # plot(x, main=paste("Simulated habitat:", level))
-  # plot(new.hab, main=paste("Grided habitat:", level))
-  # par(mfrow=c(1,1))
-  
   p <- ggplot() +
     geom_spatraster(data=new.hab) +
     scale_fill_binned_divergingx(palette="Geyser") +
@@ -62,11 +57,10 @@ grid.alg <- function(x, level, n, grp.lvl){
     lims(x=c(-n, n), y=c(-n, n)) +
     guides(fill=guide_legend(title="Value"))
   
-  png(paste0("plots/grid_plots/grid_",level,".png"), 6, 6, res=600, units="in")
+  png(paste0("plots/grid_plots/grid_",level,index,".png"), 6, 6, res=600, units="in")
   print(p)
   dev.off()
   
-  #v <- st_as_sf(new.hab, coords=c('x', 'y'))
   
   ### Return objects
   return(list(new.hab=new.hab, ssw=ssw, ssb=ssb, sst=ss.total, ssb.sst=ssb.sst,

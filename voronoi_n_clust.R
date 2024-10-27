@@ -1,57 +1,59 @@
 
 
-v.n.clust <- function(x, min.clust, max.clust, index){
+v.n.clust <- function(x, min.clust, max.clust, index, n.iter){
   
   v <- as.polygons(x, aggregate=F) 
   s <- sf::st_as_sf(v)
   x1 <- matrix(values(x), nrow=50, ncol=50, byrow=T)
   
+  ### Find point values from the centroid of each cell
+  cents.pts <- crds(x)
+  cents <- terra::extract(x, cents.pts)
+  cents <- cbind(cents, cents.pts)
+  cents <- st_as_sf(cents, coords=c('x', 'y'))
+  
   ### Get input information
   queen_w <- queen_weights(s) # Queen weighted neighborhood
   data <- s[c('lyr.1')] # Data of interest
   
+  env <- list(matrix(c(-25,-25,25,-25,25,25,-25,25, -25,-25), ncol=2, byrow=T))
+  bbox = st_sfc(st_polygon(env))
+  
   eval <- data.frame(clusters=min.clust:max.clust, Index=NA)
   
   for(i in min.clust:max.clust){
-    samps <- terra::spatSample(x, size=i, method="random", as.df=T, xy=T)
-    samps <- st_as_sf(samps, coords=c('x', 'y'))
+    score <- rep(NA, times=n.iter)
+    for(k in 1:n.iter){
+      samps <- terra::spatSample(x, size=i, method="random", as.df=T, xy=T)
+      samps <- st_as_sf(samps, coords=c('x', 'y'))
+      
+      v <- st_combine(st_geometry(samps)) %>%
+        st_voronoi(envelope=bbox) %>%
+        st_collection_extract()
+      #v <- v[unlist(st_intersects(samps, v))]
+      v <- st_as_sf(v)
+      
+      matchy <- st_contains(v, cents)
+      touchy <- st_touches(v, cents)
+      clust <- matrix(NA, n*2, n*2)
+      for(j in 1:i){
+        want.these <- c(matchy[[j]], touchy[[j]])
+        clust[want.these] <- j
+      }
+      new.clusts <- order.clusts(c(clust))
+      score[k] <- unlist(intCriteria(x1, new.clusts$new, crit=index))
+    }
     
-    
-    g <- st_combine(st_geometry(samps)) 
-    v <- st_voronoi(g)
-    v <- st_collection_extract(v)
-    v <- v[unlist(st_intersects(samps, v))]
-    v <- st_as_sf(v)
-    
-    eval$Index[i-(min.clust-1)] <- unlist(intCriteria(x1, as.vector(as.integer(cr$Clusters)), crit=index))
+    if(all(is.nan(score))){
+      eval$Index[i-(min.clust-1)] <- NA
+    }else{
+      score <- score[which(!is.nan(score))]
+      eval$Index[i-(min.clust-1)] <- mean(score, na.rm=T)
+    }
   }
   
-  # rbsste.plot <- ggplot(eval, aes(x=clusters,y=RBTSSE)) +
-  #   geom_line() +
-  #   theme_bw() +
-  #   labs(x='Clusters', y="Goodness of classification (RBTSSE)")
-  # index.plot <- ggplot(eval, aes(x=clusters,y=Index)) +
-  #   geom_line() +
-  #   theme_bw() +
-  #   labs(x='Clusters', y=index)
-  
   best.want <- which.max(eval$Index == eval$Index[bestCriterion(eval$Index[!is.nan(eval$Index)], index)])
-  
-  # n.clust.want <- eval[bestCriterion(eval$Index, index),]
   n.clust.want <- eval[best.want, "clusters"]
   
-  # return(list(eval=eval, want=n.clust.want, rbsste.plot=rbsste.plot, 
-  #             index.plot=index.plot))
   return(n.clust.want)
 }
-
-
-### Indices
-# "S_Dbw"
-# "Calinski_Harabasz"
-# "Davies_Bouldin"
-# low.red.n.clust <- redcap.n.clust(low.hab, 8, 30, "Calinski_Harabasz")
-# print(low.red.n.clust$rbsste.plot)
-# print(low.red.n.clust$index.plot)
-# low.red.n.clust$eval
-# low.red.n.clust$want

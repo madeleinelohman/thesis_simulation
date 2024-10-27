@@ -1,5 +1,5 @@
 redcap.alg <- function(x, level, min.clust, max.clust, index, n){
-  source("redcap_n_clust.R")
+  source("algs/redcap_n_clust.R")
   #~~~~~~~~~~~~~~~~~~~~
   # Decide number of clusters
   #~~~~~~~~~~~~~~~~~~~~

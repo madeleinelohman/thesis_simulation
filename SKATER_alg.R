@@ -2,7 +2,7 @@ skater.alg <- function(x, level, min.clust, max.clust, index, n){
   #~~~~~~~~~~~~~~~~~~~~
   # Decide number of clusters
   #~~~~~~~~~~~~~~~~~~~~
-  source("skater_n_clust.R")
+  source("algs/skater_n_clust.R")
   n.clust <- skater.n.clust(x, min.clust, max.clust, index)
   
   #~~~~~~~~~~~~~~~~~~~~

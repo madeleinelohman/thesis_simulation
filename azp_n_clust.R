@@ -16,30 +16,13 @@ azp.n.clust <- function(x, min.clust, max.clust, index){
     cr <- azp_tabu(i, queen_w, data) 
     eval$RBTSSE[i-(min.clust-1)] <- cr$`The ratio of between to total sum of squares`
     
-    new1 <- data.frame(org=as.vector(as.integer(cr$Clusters)), new=NA)
-    clusts <- unique(new1$org)
-    for(j in 1:length(clusts)){
-      new1$new[which(new1$org == clusts[j])] <- j
-    }
+    new.clusts <- order.clusts(cr$Clusters)
     
-    eval$Index[i-(min.clust-1)] <- unlist(intCriteria(x1, new1$new, crit=index))
+    eval$Index[i-(min.clust-1)] <- unlist(intCriteria(x1, new.clusts$new, crit=index))
   }
   
-  # rbsste.plot <- ggplot(eval, aes(x=clusters,y=RBTSSE)) +
-  #   geom_line() +
-  #   theme_bw() +
-  #   labs(x='Clusters', y="Goodness of classification (RBTSSE)")
-  # index.plot <- ggplot(eval, aes(x=clusters,y=Index)) +
-  #   geom_line() +
-  #   theme_bw() +
-  #   labs(x='Clusters', y=index)
-  
   best.want <- which.max(eval$Index == eval$Index[bestCriterion(eval$Index[!is.nan(eval$Index)], index)])
-  
-  # n.clust.want <- eval[bestCriterion(eval$Index, index),]
   n.clust.want <- eval[best.want, "clusters"]
   
-  # return(list(eval=eval, want=n.clust.want, rbsste.plot=rbsste.plot, 
-  #             index.plot=index.plot))
   return(n.clust.want)
 }

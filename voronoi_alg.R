@@ -1,4 +1,9 @@
-v.alg <- function(x, level, n.clust, n){
+v.alg <- function(x, level, min.clust, max.clust, n, index, n.iter){
+  #~~~~~~~~~~~~~~~~~~~~
+  # Decide number of points
+  #~~~~~~~~~~~~~~~~~~~~
+  source("algs/voronoi_n_clust.R")
+  n.clust <- v.n.clust(x, min.clust, max.clust, index, n.iter)
   
   #~~~~~~~~~~~~~~~~~~~~
   # Run method
@@ -6,11 +11,13 @@ v.alg <- function(x, level, n.clust, n){
   samps <- terra::spatSample(x, size=n.clust, method="random", as.df=T, xy=T)
   samps <- st_as_sf(samps, coords=c('x', 'y'))
   
+  env <- list(matrix(c(-25,-25,25,-25,25,25,-25,25, -25,-25), ncol=2, byrow=T))
+  bbox <- st_sfc(st_polygon(env))
   
-  g <- st_combine(st_geometry(samps)) 
-  v <- st_voronoi(g)
-  v <- st_collection_extract(v)
-  v <- v[unlist(st_intersects(samps, v))]
+  v <- st_combine(st_geometry(samps)) %>%
+    st_voronoi(envelope=bbox) %>%
+    st_collection_extract()
+  #v <- v[unlist(st_intersects(samps, v))]
   v <- st_as_sf(v)
   
   v$Values <- samps$lyr.1
@@ -23,7 +30,7 @@ v.alg <- function(x, level, n.clust, n){
     lims(x=c(-n, n), y=c(-n, n)) +
     guides(fill=guide_legend(title="Value"))
   
-  png(paste0("plots/v_plots/v_",level,".png"), 6, 6, res=600, units="in")
+  png(paste0("plots/v_plots/v_",level,index,".png"), 6, 6, res=600, units="in")
   print(p)
   dev.off()
   
@@ -58,8 +65,6 @@ v.alg <- function(x, level, n.clust, n){
   }
   ss.total <- sum(ssb + ssw)
   ssb.sst <- sum(ssb) / ss.total
-  
-  
   
   return(list(new.hab=v, p=p, ss.total=ss.total, ssb.sst=ssb.sst, ssw=ssw, ssb=ssb,
               clusters=c(matchymatchy)))
