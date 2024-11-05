@@ -40,10 +40,14 @@ v.n.clust <- function(x, min.clust, max.clust, index, n.iter){
         want.these <- c(matchy[[j]], touchy[[j]])
         clust[want.these] <- j
       }
+      
       new.clusts <- order.clusts(c(clust))
-      score[k] <- unlist(intCriteria(x1, new.clusts$new, crit=index))
+      if(index == "Dunn"){
+        score[k] <- dunn.score(x, new.clusts$new)
+      }else{
+        score[k] <- unlist(intCriteria(x1, new.clusts$new, crit=index))
+      }
     }
-    
     if(all(is.nan(score))){
       eval$Index[i-(min.clust-1)] <- NA
     }else{
@@ -52,7 +56,12 @@ v.n.clust <- function(x, min.clust, max.clust, index, n.iter){
     }
   }
   
-  best.want <- which.max(eval$Index == eval$Index[bestCriterion(eval$Index[!is.nan(eval$Index)], index)])
+  if(index == "Dunn"){
+    best.want <- which.max(eval$Index == max(eval$Index))
+  }else{
+    best.want <- which.max(eval$Index == eval$Index[bestCriterion(eval$Index, index)])
+  }
+  
   n.clust.want <- eval[best.want, "clusters"]
   
   return(n.clust.want)

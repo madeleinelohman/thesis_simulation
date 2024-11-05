@@ -85,7 +85,14 @@ redcap.alg <- function(x, level, min.clust, max.clust, index, n){
   ss.total <- sum(ssb + ssw)
   ssb.sst <- sum(ssb) / ss.total
   
+  new.clusts <- order.clusts(cr$Clusters)
+  if(index == "Dunn"){
+    score <- dunn.score(x, new.clusts$new)
+  }else{
+    score <- unlist(intCriteria(x1, new.clusts$new, crit=index)) 
+  }
+  
   ### Return objects
   return(list(new.hab=pred, ssw=ssw, ssb=ssb, sst=ss.total, ssb.sst=ssb.sst,
-              clusters=cr$Clusters, n.clust=n.clust,p=p))
+              clusters=cr$Clusters, n.clust=n.clust, p=p, score=score))
 }

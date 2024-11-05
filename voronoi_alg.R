@@ -4,6 +4,8 @@ v.alg <- function(x, level, min.clust, max.clust, n, index, n.iter){
   #~~~~~~~~~~~~~~~~~~~~
   source("algs/voronoi_n_clust.R")
   n.clust <- v.n.clust(x, min.clust, max.clust, index, n.iter)
+  v <- as.polygons(x, aggregate=F) 
+  s <- sf::st_as_sf(v)
   
   #~~~~~~~~~~~~~~~~~~~~
   # Run method
@@ -66,6 +68,14 @@ v.alg <- function(x, level, min.clust, max.clust, n, index, n.iter){
   ss.total <- sum(ssb + ssw)
   ssb.sst <- sum(ssb) / ss.total
   
+  
+  new.clusts <- order.clusts(c(matchymatchy))
+  if(index == "Dunn"){
+    score <- dunn.score(x, new.clusts$new)
+  }else{
+    score <- unlist(intCriteria(x1, new.clusts$new, crit=index)) 
+  }
+  
   return(list(new.hab=v, p=p, ss.total=ss.total, ssb.sst=ssb.sst, ssw=ssw, ssb=ssb,
-              clusters=c(matchymatchy)))
+              clusters=c(matchymatchy), score=score))
 }

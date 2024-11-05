@@ -85,8 +85,13 @@ azp.alg <- function(x, level, min.clust, max.clust, index){
   ss.total <- sum(ssb + ssw)
   ssb.sst <- sum(ssb) / ss.total
   
-  
+  new.clusts <- order.clusts(cr$Clusters)
+  if(index == "Dunn"){
+    score <- dunn.score(x, new.clusts$new)
+  }else{
+    score <- unlist(intCriteria(x1, new.clusts$new, crit=index)) 
+  }
   
   return(list(new.hab=pred, ssw=ssw, ssb=ssb, sst=ss.total, ssb.sst=ssb.sst,
-              clusters=cr$Clusters, p=p))
+              clusters=cr$Clusters, p=p, score=score))
 }

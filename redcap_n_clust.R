@@ -17,10 +17,18 @@ redcap.n.clust <- function(x, min.clust, max.clust, index){
     eval$RBTSSE[i-(min.clust-1)] <- cr$`The ratio of between to total sum of squares`
     
     new.clusts <- order.clusts(cr$Clusters)
-    eval$Index[i-(min.clust-1)] <- unlist(intCriteria(x1, new.clusts$new, crit=index))
+    if(index == "Dunn"){
+      eval$Index[i-(min.clust-1)] <- dunn.score(x, new.clusts$new)
+    }else{
+      eval$Index[i-(min.clust-1)] <- unlist(intCriteria(x1, new.clusts$new, crit=index)) 
+    }
   }
-  
-  best.want <- which.max(eval$Index == eval$Index[bestCriterion(eval$Index[!is.nan(eval$Index)], index)])
+  if(index == "Dunn"){
+    best.want <- which.max(eval$Index == max(eval$Index))
+  }else{
+    best.want <- which.max(eval$Index == eval$Index[bestCriterion(eval$Index, index)])
+  }
+
   n.clust.want <- eval[best.want, "clusters"]
   
   return(n.clust.want)

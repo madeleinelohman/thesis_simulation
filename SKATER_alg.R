@@ -12,6 +12,7 @@ skater.alg <- function(x, level, min.clust, max.clust, index, n){
   # Need to go through sp class to get to sf class from SpatRaster 
   v <- as.polygons(x, aggregate=F) 
   s <- sf::st_as_sf(v)
+  x1 <- matrix(values(x), nrow=50, ncol=50, byrow=T)
   
   ### Get input information
   queen_w <- queen_weights(s) # Queen weighted neighborhood
@@ -81,7 +82,15 @@ skater.alg <- function(x, level, min.clust, max.clust, index, n){
   ss.total <- sum(ssb + ssw)
   ssb.sst <- sum(ssb) / ss.total
   
+  new.clusts <- order.clusts(cr$Clusters)
+  if(index == "Dunn"){
+    score <- dunn.score(x, new.clusts$new)
+  }else{
+    score <- unlist(intCriteria(x1, new.clusts$new, crit=index)) 
+  }
+
+  
   ### Return objects
   return(list(new.hab=pred, ssw=ssw, ssb=ssb, sst=ss.total, ssb.sst=ssb.sst,
-              clusters=cr$Clusters, n.clust=n.clust,p=p))
+              clusters=cr$Clusters, n.clust=n.clust,p=p, score=score))
 }

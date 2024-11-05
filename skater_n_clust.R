@@ -12,20 +12,25 @@ skater.n.clust <- function(x, min.clust, max.clust, index){
   queen_w <- queen_weights(s) # Queen weighted neighborhood
   data <- s[c('lyr.1')] # Data of interest
   
-  eval <- data.frame(clusters=min.clust:max.clust, RBTSSE=NA, Index=NA)
+  eval <- data.frame(clusters=min.clust:max.clust, RS=NA, Index=NA)
   
   for(i in min.clust:max.clust){
     cr <- rgeoda::skater(i, queen_w, data, cpu_threads = 1) 
-    eval$RBTSSE[i-(min.clust-1)] <- cr$`The ratio of between to total sum of squares`
+    eval$RS[i-(min.clust-1)] <- cr$`The ratio of between to total sum of squares`
     
     new.clusts <- order.clusts(cr$Clusters)
-    eval$Index[i-(min.clust-1)] <- unlist(intCriteria(x1, new.clusts$new, crit=index))
+    if(index == "Dunn"){
+      eval$Index[i-(min.clust-1)] <- dunn.score(x, new.clusts$new)
+    }else{
+      eval$Index[i-(min.clust-1)] <- unlist(intCriteria(x1, new.clusts$new, crit=index)) 
+    }
+  }
+  if(index == "Dunn"){
+    best.want <- which.max(eval$Index == max(eval$Index))
+  }else{
+    best.want <- which.max(eval$Index == eval$Index[bestCriterion(eval$Index, index)])
   }
   
-  
-  eval <- eval[which(!is.nan(eval$Index) & eval$Index < 1*10^6),]
-  # eval <- eval[which(!is.nan(eval$Index)),]
-  best.want <- which.max(eval$Index == eval$Index[bestCriterion(eval$Index, index)])
   n.clust.want <- eval[best.want, "clusters"]
   
   return(n.clust.want)
