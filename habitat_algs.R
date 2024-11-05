@@ -21,12 +21,13 @@ setwd("/Users/madelienelohman/Documents/GitHub/thesis_simulation")
 set.seed(2024)
 
 
-source("algs/grid_alg.R")
+source("algs/grd_alg.R")
 source("algs/voronoi_alg.R")
 source("algs/azp_alg.R")
 source("algs/SKATER_alg.R")
 source("algs/REDCAP_alg.R")
-source("order_clusts.R")
+source("misc_funcs/order_clusts.R")
+source("misc_funcs/dunn_score.R")
 
 ### Read in simulated rasters
 low.hab <- readRDS("habitats/low_hab.rds")
@@ -37,12 +38,6 @@ high.hab <- readRDS("habitats/high_hab.rds")
 n = dim(low.hab)[1]/2
 min.clust = 3
 max.clust = 50
-
-# "Calinski_Harabasz"
-# "Davies_Bouldin"
-# "Dunn"
-# "SD_Scat"
-# "Silhouette"
 
 start.time <- Sys.time()
 indices <- c("Calinski_Harabasz", "Davies_Bouldin", "Dunn", "SD_Scat", "Silhouette")
@@ -55,14 +50,14 @@ for(k in 1:length(indices)){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Grid
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  low.grid <- grid.alg(low.hab, "Low", n, index)
-  low.grid$ssb.sst
+  low.grid <- grid.alg(low.hab, "Low", n, index, min.clust, max.clust)
+  low.grid$score
   
-  medium.grid <- grid.alg(medium.hab, "Medium", n, index)
-  medium.grid$ssb.sst
+  medium.grid <- grid.alg(medium.hab, "Medium", n, index, min.clust, max.clust)
+  medium.grid$score
   
-  high.grid <- grid.alg(high.hab, "High", n, index)
-  high.grid$ssb.sst
+  high.grid <- grid.alg(high.hab, "High", n, index, min.clust, max.clust)
+  high.grid$score
   
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -71,54 +66,53 @@ for(k in 1:length(indices)){
   n.iter=25
   
   low.v <- v.alg(low.hab, "Low", min.clust, max.clust, n, index, n.iter)
-  print(low.v$p)
-  low.v$ssb.sst
+  low.v$score
   
   medium.v <- v.alg(medium.hab, "Medium", min.clust, max.clust, n, index, n.iter)
-  print(medium.v$p)
-  medium.v$ssb.sst
+  medium.v$score
   
   high.v <- v.alg(high.hab, "High", min.clust, max.clust, n, index, n.iter)
-  print(high.v$p)
-  high.v$ssb.sst
+  high.v$score
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # AZP
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   low.azp <- azp.alg(low.hab, "Low", min.clust, max.clust, index)
-  low.azp$ssb.sst
+  low.azp$score
   
   medium.azp <- azp.alg(medium.hab, "Medium", min.clust, max.clust, index)
-  medium.azp$ssb.sst
+  medium.azp$score
   
   high.azp <- azp.alg(high.hab, "High", min.clust, max.clust, index)
-  high.azp$ssb.sst
+  high.azp$score
   
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # SKATER
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   low.skater <- skater.alg(low.hab, "Low", min.clust, max.clust, index, n)
-  low.skater$ssb.sst
+  low.skater$score
+  low.skater$n.clust
   
   medium.skater <- skater.alg(medium.hab, "Medium", min.clust, max.clust, index, n)
-  medium.skater$ssb.sst
+  medium.skater$score
+  medium.skater$n.clust
   
   high.skater <- skater.alg(high.hab, "High", min.clust, max.clust, index, n)
-  high.skater$ssb.sst
-  
+  high.skater$score
+  high.skater$n.clust
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # REDCAP
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   low.red <- redcap.alg(low.hab, "Low", min.clust, max.clust, index, n)
-  low.red$ssb.sst
+  low.red$score
   
   medium.red <- redcap.alg(medium.hab, "Medium", min.clust, max.clust, index, n)
-  medium.red$ssb.sst
+  medium.red$score
   
   high.red <- redcap.alg(high.hab, "High", min.clust, max.clust, index, n)
-  high.red$ssb.sst
+  high.red$score
   
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
